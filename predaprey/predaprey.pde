@@ -1,7 +1,7 @@
 static final int hei = 5; 
 static final int wid = 5; 
 static final color[] sigils = {#f5f5f5, #CC6600, #71025c, #5382a1};
-static final int wait = 50;
+static final int wait = 5;
 
 Pointy pointy_ones[][];
 Tribe tribes[];
@@ -57,6 +57,7 @@ void draw()
       for (int j = 0; j < pointy_ones[i].length-1; j++) {
         pointy_ones[i][j].update(pointy_ones[i+1][j]);
         pointy_ones[i][j].update(pointy_ones[i][j+1]);
+
       }
     }
     for (int i = pointy_ones.length-1; i > 0 ; i--) {
@@ -71,7 +72,7 @@ void draw()
 }
 
 void mouseDragged() {
-  if(mouseX<width && mouseY<height){
+  if(mouseX>0 && mouseY>0 && mouseX<width-1 && mouseY<height-1){
     Pointy this_point = pointy_ones[mouseX/wid][mouseY/hei];
     this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
   }
