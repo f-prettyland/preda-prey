@@ -1,7 +1,30 @@
-static final int hei = 5; 
-static final int wid = 5; 
-static final color[] sigils = {#f5f5f5, #CC6600, #71025c, #5382a1};
-static final int wait = 5;
+static final int hei = 5;
+static final int wid = 5;
+//Using Kellys Colours 
+static final color background = #f5f5f5;
+static final color[] sigils = {#FFB300, //Vivid Yellow
+#803E75, //Strong Purple
+#FF6800, //Vivid Orange
+#A6BDD7, //Very Light Blue
+#C10020, //Vivid Red
+#CEA262, //Grayish Yellow
+#817066, //Medium Gray
+#007D34, //Vivid Green
+#F6768E, //Strong Purplish Pink
+#00538A, //Strong Blue
+#FF7A5C, //Strong Yellowish Pink
+#53377A, //Strong Violet
+#FF8E00, //Vivid Orange Yellow
+#B32851, //Strong Purplish Red
+#F4C800, //Vivid Greenish Yellow
+#7F180D, //Strong Reddish Brown
+#93AA00, //Vivid Yellowish Green
+#593315, //Deep Yellowish Brown
+#F13A13, //Vivid Reddish Orange
+#232C16,}; //Dark Olive Green
+static final int num_of_tribes = 20;
+static final int wait = 50;
+static boolean mouse_held = false;
 
 Pointy pointy_ones[][];
 Tribe tribes[];
@@ -12,18 +35,34 @@ void setup()
   size(800, 800);
 
   //generate tribes
-  tribes = new Tribe[sigils.length];
-  for (int i = 0; i < sigils.length; i++) {
-    tribes[i] = new Tribe(sigils[i]);
+  tribes = new Tribe[num_of_tribes+1];
+  
+  //blank is blank
+  tribes[0] =  new Tribe(background);
+  for (int i = 1; i < tribes.length; i++) {
+    tribes[i] = new Tribe(sigils[(i-1)%(sigils.length-1)]);
   }
-  Tribe temp[] = {tribes[1],tribes[2],tribes[3]};
-  tribes[0].addDominators(temp);
-  Tribe temp1[] = {tribes[2]};
-  tribes[1].addDominators(temp1);
-  Tribe temp2[] = {tribes[3]};
-  tribes[2].addDominators(temp2);
-  Tribe temp3[] = {tribes[1]};
-  tribes[3].addDominators(temp3);
+
+  //blank gets beaten by all
+  Tribe white_crushers[] = new Tribe[tribes.length];
+  for (int i = 1; i < tribes.length; i++) {
+    white_crushers[i-1] = tribes[i];
+  }
+  tribes[0].addDominators(white_crushers);
+  //adding each tribes predators
+  int num_domniators = num_of_tribes/2;
+  for (int i = 1; i < tribes.length; i++) {
+    Tribe temp[] = new Tribe[num_domniators];
+    //iterate over each new denominator
+    for (int j = 0; j < num_domniators; j++) {
+      int denom_index = i+1+j;
+      if(denom_index >= tribes.length){
+        denom_index = denom_index%tribes.length;
+      }
+      temp[j] = tribes[denom_index];
+    }
+    tribes[i].addDominators(temp);
+  }
 
   //create blank points
   pointy_ones = new Pointy[width/wid][height/hei];
@@ -32,9 +71,7 @@ void setup()
       pointy_ones[i][j] = new Pointy(i, j, tribes[0]);
     }
   }
-
-
-  for (int i = 0; i < 0; i++) {
+  for (int i = 0; i < 500; i++) {
     int rand_x = int(random(pointy_ones.length));
     int rand_y = int(random(pointy_ones[0].length));
     int rand_tri = int(random(tribes.length-1))+1;
@@ -43,7 +80,7 @@ void setup()
 
   time = millis();
 }
- 
+
 void draw()
 {
   noStroke();
@@ -52,26 +89,41 @@ void draw()
       lil_point.display();
     }
   }
-  if(millis() - time >= wait){
-    for (int i = 0; i < pointy_ones.length-1; i++) {
-      for (int j = 0; j < pointy_ones[i].length-1; j++) {
-        pointy_ones[i][j].update(pointy_ones[i+1][j]);
-        pointy_ones[i][j].update(pointy_ones[i][j+1]);
+  //Allow user to draw
+  if(mouse_held){mouseHeld();};
 
-      }
-    }
-    for (int i = pointy_ones.length-1; i > 0 ; i--) {
-      for (int j =  pointy_ones[i].length-1; j > 0; j--) {
-        pointy_ones[i][j].update(pointy_ones[i-1][j]);
-        pointy_ones[i][j].update(pointy_ones[i][j-1]);
-      }
-    }
+  if(millis() - time >= wait){
+    updateCells();
     // saveFrame("line-######.png");
     time = millis();
   }
 }
 
-void mouseDragged() {
+void updateCells(){
+  for (int i = 0; i < pointy_ones.length-1; i++) {
+    for (int j = 0; j < pointy_ones[i].length-1; j++) {
+      pointy_ones[i][j].update(pointy_ones[i+1][j]);
+      pointy_ones[i][j].update(pointy_ones[i][j+1]);
+
+    }
+  }
+  for (int i = pointy_ones.length-1; i > 0 ; i--) {
+    for (int j =  pointy_ones[i].length-1; j > 0; j--) {
+      pointy_ones[i][j].update(pointy_ones[i-1][j]);
+      pointy_ones[i][j].update(pointy_ones[i][j-1]);
+    }
+  }
+}
+
+void mousePressed(){
+  mouse_held = true;
+}
+
+void mouseReleased(){
+  mouse_held = false;
+}
+
+void mouseHeld() {
   if(mouseX>0 && mouseY>0 && mouseX<width-1 && mouseY<height-1){
     Pointy this_point = pointy_ones[mouseX/wid][mouseY/hei];
     this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
