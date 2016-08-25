@@ -5,6 +5,7 @@ Written in Processing, this program aims to create a predator-prey model where t
 ![](/out/example.gif)
 
 ## Todo
+- Increase values a lot
+- add mutation
 - Add interactive
-	+ clicking to add nodes
 	+ input values

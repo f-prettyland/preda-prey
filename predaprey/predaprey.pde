@@ -1,7 +1,7 @@
-static final int hei = 1; 
-static final int wid = 1; 
+static final int hei = 5; 
+static final int wid = 5; 
 static final color[] sigils = {#f5f5f5, #CC6600, #71025c, #5382a1};
-static final int wait = 1;
+static final int wait = 50;
 
 Pointy pointy_ones[][];
 Tribe tribes[];
@@ -9,7 +9,7 @@ int time;
 
 void setup()
 {
-  size(300, 300);
+  size(800, 800);
 
   //generate tribes
   tribes = new Tribe[sigils.length];
@@ -34,7 +34,7 @@ void setup()
   }
 
 
-  for (int i = 0; i < 80; i++) {
+  for (int i = 0; i < 0; i++) {
     int rand_x = int(random(pointy_ones.length));
     int rand_y = int(random(pointy_ones[0].length));
     int rand_tri = int(random(tribes.length-1))+1;
@@ -52,7 +52,7 @@ void draw()
       lil_point.display();
     }
   }
-  // if(millis() - time >= wait){
+  if(millis() - time >= wait){
     for (int i = 0; i < pointy_ones.length-1; i++) {
       for (int j = 0; j < pointy_ones[i].length-1; j++) {
         pointy_ones[i][j].update(pointy_ones[i+1][j]);
@@ -65,9 +65,16 @@ void draw()
         pointy_ones[i][j].update(pointy_ones[i][j-1]);
       }
     }
-    saveFrame("line-######.png");
-  //   time = millis();
-  // }
+    // saveFrame("line-######.png");
+    time = millis();
+  }
+}
+
+void mouseDragged() {
+  if(mouseX<width && mouseY<height){
+    Pointy this_point = pointy_ones[mouseX/wid][mouseY/hei];
+    this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
+  }
 }
  
 class Pointy 
