@@ -23,7 +23,9 @@ static final color[] sigils = {#FFB300, //Vivid Yellow
 #F13A13, //Vivid Reddish Orange
 #232C16,}; //Dark Olive Green
 static final int num_of_tribes = 20;
-static final int wait = 50;
+static final int wait = 0;
+static final boolean muatate = true;
+static final float mutation_chance = 0.000001;
 static boolean mouse_held = false;
 
 Pointy pointy_ones[][];
@@ -32,7 +34,7 @@ int time;
 
 void setup()
 {
-  size(800, 800);
+  size(600, 600);
 
   //generate tribes
   tribes = new Tribe[num_of_tribes+1];
@@ -142,6 +144,11 @@ class Pointy
   }
  
   void update(Pointy fightee) {
+    //mutate
+    if(muatate && random(1) < mutation_chance){
+      tribe = tribes[int(random(tribes.length-1))+1];
+      return;
+    }
     Tribe other_tribe = fightee.getTribe();
     int result = tribe.getsBeat(other_tribe);
     if(result == 1){
