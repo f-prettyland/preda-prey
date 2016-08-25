@@ -1,21 +1,99 @@
-static final int hei = 1; 
-static final int wid = 1; 
-static final color[] sigils = {#f5f5f5, #CC6600, #71025c, #5382a1};
-static final int wait = 1;
+static final String   DEFAULT_CONFIG_FILE_PATH    = "config.json";
+static final String[] DEFAULT_SIGIL_STRING_COLORS = {"fff5f5f5", "ffcc6600", "ff71025c", "ff5382a1"};
 
 Pointy pointy_ones[][];
 Tribe tribes[];
 int time;
 
+Config global_config;
+
+/**
+ * Stores the current configuration state of the application.
+ */
+class Config {
+  int cell_height = 1;
+  int cell_width = 1;
+
+  int window_height = 300;
+  int window_width  = 300;
+
+  ArrayList<String> sigils = new ArrayList<String>();
+
+  int wait = 1;
+
+  /**
+   * Add the default sigil colors.
+   */
+  void use_default_sigils() {
+    for (int i = 0; i < DEFAULT_SIGIL_STRING_COLORS.length; i++) {
+      this.sigils.add(DEFAULT_SIGIL_STRING_COLORS[i]);
+    }
+  }
+
+  /**
+   * Attempt to load configuration values from a JSON file.
+   *
+   * @param path Path to the configuration file.
+   */
+  boolean load_from_file(String path) {
+    File config_file = new File(path);
+
+    if (!config_file.exists()) {
+      this.use_default_sigils();
+
+      return false;
+    }
+
+    JSONObject json = loadJSONObject(path);
+
+    this.cell_height = json.getInt("cellHeight", this.cell_height);
+    this.cell_width  = json.getInt("cellWidth", this.cell_width);
+
+    this.window_height = json.getInt("windowHeight", this.window_height);
+    this.window_width = json.getInt("windowWidth", this.window_width);
+
+    try {
+      String[] string_sigils = json.getJSONArray("sigils").getStringArray();
+      for (int i = 0; i < string_sigils.length; i++) {
+        this.sigils.add(string_sigils[i]);
+      }
+
+      this.wait = json.getInt("wait", this.wait);
+    } catch (RuntimeException e) {
+      this.use_default_sigils();
+    }
+
+    return true;
+  }
+
+  /**
+   * Print the current configuration state of the application to stdout.
+   */
+  void print_state() {
+    println("Window (Width,Height) = (" + this.window_width + "," + this.window_height + ")");
+    println("Cell (Width,Height) = (" + this.cell_width + "," + this.cell_height + ")");
+    println("Number of Sigils = " + this.sigils.size());
+    println("Wait = " + this.wait);
+  }
+}
+
+void settings() {
+  global_config = new Config();
+
+  global_config.load_from_file(DEFAULT_CONFIG_FILE_PATH);
+  global_config.print_state();
+
+  size(global_config.window_width, global_config.window_height);
+}
+
 void setup()
 {
-  size(300, 300);
-
   //generate tribes
-  tribes = new Tribe[sigils.length];
-  for (int i = 0; i < sigils.length; i++) {
-    tribes[i] = new Tribe(sigils[i]);
+  tribes = new Tribe[global_config.sigils.size()];
+  for (int i = 0; i < global_config.sigils.size(); i++) {
+    tribes[i] = new Tribe(unhex(global_config.sigils.get(i)));
   }
+
   Tribe temp[] = {tribes[1],tribes[2],tribes[3]};
   tribes[0].addDominators(temp);
   Tribe temp1[] = {tribes[2]};
@@ -26,7 +104,7 @@ void setup()
   tribes[3].addDominators(temp3);
 
   //create blank points
-  pointy_ones = new Pointy[width/wid][height/hei];
+  pointy_ones = new Pointy[width / global_config.cell_width][height / global_config.cell_height];
   for (int i = 0; i < pointy_ones.length; i++) {
     for (int j = 0; j < pointy_ones[i].length; j++) {
       pointy_ones[i][j] = new Pointy(i, j, tribes[0]);
@@ -49,7 +127,7 @@ void draw()
   noStroke();
   for(Pointy[] point_line : pointy_ones){
     for(Pointy lil_point : point_line){
-      lil_point.display();
+      lil_point.display(global_config.cell_width, global_config.cell_height);
     }
   }
   // if(millis() - time >= wait){
@@ -111,9 +189,9 @@ class Pointy
     beat = true;
   }
  
-  void display() {
+  void display(int cell_width, int cell_height) {
     fill(tribe.getCol());
-    rect(wid*xP, hei*yP, hei, wid);
+    rect(cell_width * xP, cell_height * yP, cell_width, cell_height);
     beat =false;
   }
 }
