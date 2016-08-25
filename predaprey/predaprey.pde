@@ -130,7 +130,7 @@ void setup()
 {
   //generate tribes
   tribes = new Tribe[global_config.initial_tribe_count + 1];
-  
+
   //blank is blank
   tribes[0] =  new Tribe(unhex(global_config.bg_color));
   for (int i = 1; i < tribes.length; i++) {
@@ -225,8 +225,8 @@ void mouseHeld() {
     this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
   }
 }
- 
-class Pointy 
+
+class Pointy
 {
   float xP, yP;
   boolean beat = false;
@@ -236,7 +236,7 @@ class Pointy
     yP = yp;
     tribe = tr;
   }
- 
+
   void update(Pointy fightee, boolean mutate, float mutation_chance) {
     if(mutate && random(1) < mutation_chance){
       tribe = tribes[int(random(tribes.length-1))+1];
@@ -270,15 +270,15 @@ class Pointy
     tribe = tr;
     beat = true;
   }
- 
+
   void display(int cell_width, int cell_height) {
     fill(tribe.getCol());
     rect(cell_width * xP, cell_height * yP, cell_width, cell_height);
     beat =false;
   }
 }
- 
-class Tribe 
+
+class Tribe
 {
   color sigil;
   Tribe[] dominators;
