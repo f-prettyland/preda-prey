@@ -2,5 +2,8 @@
 	"cellWidth": 5,
 	"cellHeight": 5,
 	"windowWidth": 400,
-	"windowHeight": 400
+	"windowHeight": 400,
+	"initialTribeCount": 10,
+	"tribesMutate": true,
+	"tribesMutateChance": 0.00001
 }

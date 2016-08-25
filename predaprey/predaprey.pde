@@ -1,5 +1,28 @@
 static final String   DEFAULT_CONFIG_FILE_PATH    = "config.json";
-static final String[] DEFAULT_SIGIL_STRING_COLORS = {"fff5f5f5", "ffcc6600", "ff71025c", "ff5382a1"};
+static final String[] DEFAULT_SIGIL_STRING_COLORS = {
+  "ffffb300", // Vivid Yellow
+  "ff803e75", // Strong Purple
+  "ffff6800", // Vivid Orange
+  "ffa6bdd7", // Very Light Blue
+  "ffc10020", // Vivid Red
+  "ffcea262", // Grayish Yellow
+  "ff817066", // Medium Gray
+  "ff007d34", // Vivid Green
+  "fff6768e", // Strong Purplish Pink
+  "ff00538a", // Strong Blue
+  "ffff745c", // Strong Yellowish Pink
+  "ff53377a", // Strong Violet
+  "ffff8e00", // Vivid Orange Yellow
+  "ffb32851", // Strong Purplish Red
+  "fff4c800", // Vivid Greenish Yellow
+  "ff7f180d", // Strong Reddish Brown
+  "ff93aa00", // Vivid Yellowish Green
+  "ff593315", // Deep Yellowish Brown
+  "fff13a13", // Vivid Reddish Orange
+  "ff232c16", // Dark Olive Green
+};
+
+static boolean mouse_held = false;
 
 Pointy pointy_ones[][];
 Tribe tribes[];
@@ -18,6 +41,12 @@ class Config {
   int window_width  = 300;
 
   ArrayList<String> sigils = new ArrayList<String>();
+  String bg_color = "fff5f5f5";
+
+  int initial_tribe_count = 20;
+
+  boolean tribes_mutate        = true;
+  float   tribes_mutate_chance = 0.000001;
 
   int wait = 1;
 
@@ -52,13 +81,20 @@ class Config {
     this.window_height = json.getInt("windowHeight", this.window_height);
     this.window_width = json.getInt("windowWidth", this.window_width);
 
+    this.bg_color = json.getString("bgColor", this.bg_color);
+
+    this.initial_tribe_count = json.getInt("initialTribeCount", this.initial_tribe_count);
+
+    this.tribes_mutate = json.getBoolean("tribesMutate", this.tribes_mutate);
+    this.tribes_mutate_chance = json.getFloat("tribesMutateChance", this.tribes_mutate_chance);
+
+    this.wait = json.getInt("wait", this.wait);
+
     try {
       String[] string_sigils = json.getJSONArray("sigils").getStringArray();
       for (int i = 0; i < string_sigils.length; i++) {
         this.sigils.add(string_sigils[i]);
       }
-
-      this.wait = json.getInt("wait", this.wait);
     } catch (RuntimeException e) {
       this.use_default_sigils();
     }
@@ -73,6 +109,10 @@ class Config {
     println("Window (Width,Height) = (" + this.window_width + "," + this.window_height + ")");
     println("Cell (Width,Height) = (" + this.cell_width + "," + this.cell_height + ")");
     println("Number of Sigils = " + this.sigils.size());
+    println("Background Color = #" + this.bg_color);
+    println("Initial Tribes = " + this.initial_tribe_count);
+    println("Tribes Mutate? = " + this.tribes_mutate);
+    println("Tribes Mutation Chance = " + this.tribes_mutate_chance);
     println("Wait = " + this.wait);
   }
 }
@@ -89,19 +129,36 @@ void settings() {
 void setup()
 {
   //generate tribes
-  tribes = new Tribe[global_config.sigils.size()];
-  for (int i = 0; i < global_config.sigils.size(); i++) {
-    tribes[i] = new Tribe(unhex(global_config.sigils.get(i)));
+  tribes = new Tribe[global_config.initial_tribe_count + 1];
+  
+  //blank is blank
+  tribes[0] =  new Tribe(unhex(global_config.bg_color));
+  for (int i = 1; i < tribes.length; i++) {
+    tribes[i] = new Tribe(unhex(global_config.sigils.get((i - 1) % (global_config.sigils.size() - 1))));
   }
 
-  Tribe temp[] = {tribes[1],tribes[2],tribes[3]};
-  tribes[0].addDominators(temp);
-  Tribe temp1[] = {tribes[2]};
-  tribes[1].addDominators(temp1);
-  Tribe temp2[] = {tribes[3]};
-  tribes[2].addDominators(temp2);
-  Tribe temp3[] = {tribes[1]};
-  tribes[3].addDominators(temp3);
+  //blank gets beaten by all
+  Tribe white_crushers[] = new Tribe[tribes.length];
+  for (int i = 1; i < tribes.length; i++) {
+    white_crushers[i-1] = tribes[i];
+  }
+  tribes[0].addDominators(white_crushers);
+
+  //adding each tribes predators
+  int num_domniators = global_config.initial_tribe_count / 2;
+  for (int i = 1; i < tribes.length; i++) {
+    Tribe temp[] = new Tribe[num_domniators];
+
+    //iterate over each new denominator
+    for (int j = 0; j < num_domniators; j++) {
+      int denom_index = i+1+j;
+      if(denom_index >= tribes.length){
+        denom_index = denom_index%tribes.length;
+      }
+      temp[j] = tribes[denom_index];
+    }
+    tribes[i].addDominators(temp);
+  }
 
   //create blank points
   pointy_ones = new Pointy[width / global_config.cell_width][height / global_config.cell_height];
@@ -110,9 +167,7 @@ void setup()
       pointy_ones[i][j] = new Pointy(i, j, tribes[0]);
     }
   }
-
-
-  for (int i = 0; i < 80; i++) {
+  for (int i = 0; i < 500; i++) {
     int rand_x = int(random(pointy_ones.length));
     int rand_y = int(random(pointy_ones[0].length));
     int rand_tri = int(random(tribes.length-1))+1;
@@ -121,7 +176,7 @@ void setup()
 
   time = millis();
 }
- 
+
 void draw()
 {
   noStroke();
@@ -130,22 +185,45 @@ void draw()
       lil_point.display(global_config.cell_width, global_config.cell_height);
     }
   }
-  // if(millis() - time >= wait){
-    for (int i = 0; i < pointy_ones.length-1; i++) {
-      for (int j = 0; j < pointy_ones[i].length-1; j++) {
-        pointy_ones[i][j].update(pointy_ones[i+1][j]);
-        pointy_ones[i][j].update(pointy_ones[i][j+1]);
-      }
+  //Allow user to draw
+  if(mouse_held){mouseHeld();};
+
+  if(millis() - time >= global_config.wait){
+    updateCells();
+    // saveFrame("line-######.png");
+    time = millis();
+  }
+}
+
+void updateCells(){
+  for (int i = 0; i < pointy_ones.length-1; i++) {
+    for (int j = 0; j < pointy_ones[i].length-1; j++) {
+      pointy_ones[i][j].update(pointy_ones[i+1][j], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+      pointy_ones[i][j].update(pointy_ones[i][j+1], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+
     }
-    for (int i = pointy_ones.length-1; i > 0 ; i--) {
-      for (int j =  pointy_ones[i].length-1; j > 0; j--) {
-        pointy_ones[i][j].update(pointy_ones[i-1][j]);
-        pointy_ones[i][j].update(pointy_ones[i][j-1]);
-      }
+  }
+  for (int i = pointy_ones.length-1; i > 0 ; i--) {
+    for (int j =  pointy_ones[i].length-1; j > 0; j--) {
+      pointy_ones[i][j].update(pointy_ones[i-1][j], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+      pointy_ones[i][j].update(pointy_ones[i][j-1], global_config.tribes_mutate, global_config.tribes_mutate_chance);
     }
-    saveFrame("line-######.png");
-  //   time = millis();
-  // }
+  }
+}
+
+void mousePressed(){
+  mouse_held = true;
+}
+
+void mouseReleased(){
+  mouse_held = false;
+}
+
+void mouseHeld() {
+  if(mouseX>0 && mouseY>0 && mouseX<width-1 && mouseY<height-1){
+    Pointy this_point = pointy_ones[mouseX / global_config.cell_width][mouseY / global_config.cell_height];
+    this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
+  }
 }
  
 class Pointy 
@@ -159,7 +237,11 @@ class Pointy
     tribe = tr;
   }
  
-  void update(Pointy fightee) {
+  void update(Pointy fightee, boolean mutate, float mutation_chance) {
+    if(mutate && random(1) < mutation_chance){
+      tribe = tribes[int(random(tribes.length-1))+1];
+      return;
+    }
     Tribe other_tribe = fightee.getTribe();
     int result = tribe.getsBeat(other_tribe);
     if(result == 1){
