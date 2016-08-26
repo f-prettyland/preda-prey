@@ -11,6 +11,16 @@ Written in Processing, this program aims to create a predator-prey model where t
 ### 5000 initial tribe cells
 ![](/out/example-20-2.gif)
 
+## Running
+If you have processing installed as a system package you can simply do:
+```
+make run
+```
+If you have installed processing to a custom location you can instead do:
+```
+make run processing-bin=/path/to/processing-java
+```
+
 ## Configuration
 The sketch looks for a `config.json` file in the directory that it is run from
 and will load values if they are present.

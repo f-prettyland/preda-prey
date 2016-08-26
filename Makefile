@@ -1,5 +1,5 @@
-
-src=predaprey
+processing-bin=processing-java
+processing-sketch=predaprey
 
 run:
-	processing-java --sketch=$(src) --run
+	$(processing-bin) --sketch=$(processing-sketch) --run
