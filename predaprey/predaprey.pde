@@ -1,48 +1,140 @@
-static final int hei = 5;
-static final int wid = 5;
-//Using Kellys Colours 
-static final color background = #f5f5f5;
-static final color[] sigils = {#FFB300, //Vivid Yellow
-#803E75, //Strong Purple
-#FF6800, //Vivid Orange
-#A6BDD7, //Very Light Blue
-#C10020, //Vivid Red
-#CEA262, //Grayish Yellow
-#817066, //Medium Gray
-#007D34, //Vivid Green
-#F6768E, //Strong Purplish Pink
-#00538A, //Strong Blue
-#FF7A5C, //Strong Yellowish Pink
-#53377A, //Strong Violet
-#FF8E00, //Vivid Orange Yellow
-#B32851, //Strong Purplish Red
-#F4C800, //Vivid Greenish Yellow
-#7F180D, //Strong Reddish Brown
-#93AA00, //Vivid Yellowish Green
-#593315, //Deep Yellowish Brown
-#F13A13, //Vivid Reddish Orange
-#232C16,}; //Dark Olive Green
-static final int num_of_tribes = 20;
-static final int wait = 0;
-static final boolean muatate = true;
-static final float mutation_chance = 0.000001;
+static final String   DEFAULT_CONFIG_FILE_PATH    = "config.json";
+static final String[] DEFAULT_SIGIL_STRING_COLORS = {
+  "ffffb300", // Vivid Yellow
+  "ff803e75", // Strong Purple
+  "ffff6800", // Vivid Orange
+  "ffa6bdd7", // Very Light Blue
+  "ffc10020", // Vivid Red
+  "ffcea262", // Grayish Yellow
+  "ff817066", // Medium Gray
+  "ff007d34", // Vivid Green
+  "fff6768e", // Strong Purplish Pink
+  "ff00538a", // Strong Blue
+  "ffff745c", // Strong Yellowish Pink
+  "ff53377a", // Strong Violet
+  "ffff8e00", // Vivid Orange Yellow
+  "ffb32851", // Strong Purplish Red
+  "fff4c800", // Vivid Greenish Yellow
+  "ff7f180d", // Strong Reddish Brown
+  "ff93aa00", // Vivid Yellowish Green
+  "ff593315", // Deep Yellowish Brown
+  "fff13a13", // Vivid Reddish Orange
+  "ff232c16", // Dark Olive Green
+};
+
 static boolean mouse_held = false;
 
 Pointy pointy_ones[][];
 Tribe tribes[];
 int time;
 
+Config global_config;
+
+/**
+ * Stores the current configuration state of the application.
+ */
+class Config {
+  int cell_height = 1;
+  int cell_width = 1;
+
+  int window_height = 300;
+  int window_width  = 300;
+
+  ArrayList<String> sigils = new ArrayList<String>();
+  String bg_color = "fff5f5f5";
+
+  int initial_tribe_count = 20;
+
+  boolean tribes_mutate        = true;
+  float   tribes_mutate_chance = 0.000001;
+
+  int wait = 1;
+
+  /**
+   * Add the default sigil colors.
+   */
+  void use_default_sigils() {
+    for (int i = 0; i < DEFAULT_SIGIL_STRING_COLORS.length; i++) {
+      this.sigils.add(DEFAULT_SIGIL_STRING_COLORS[i]);
+    }
+  }
+
+  /**
+   * Attempt to load configuration values from a JSON file.
+   *
+   * @param path Path to the configuration file.
+   */
+  boolean load_from_file(String path) {
+    File config_file = new File(path);
+
+    if (!config_file.exists()) {
+      this.use_default_sigils();
+
+      return false;
+    }
+
+    JSONObject json = loadJSONObject(path);
+
+    this.cell_height = json.getInt("cellHeight", this.cell_height);
+    this.cell_width  = json.getInt("cellWidth", this.cell_width);
+
+    this.window_height = json.getInt("windowHeight", this.window_height);
+    this.window_width = json.getInt("windowWidth", this.window_width);
+
+    this.bg_color = json.getString("bgColor", this.bg_color);
+
+    this.initial_tribe_count = json.getInt("initialTribeCount", this.initial_tribe_count);
+
+    this.tribes_mutate = json.getBoolean("tribesMutate", this.tribes_mutate);
+    this.tribes_mutate_chance = json.getFloat("tribesMutateChance", this.tribes_mutate_chance);
+
+    this.wait = json.getInt("wait", this.wait);
+
+    try {
+      String[] string_sigils = json.getJSONArray("sigils").getStringArray();
+      for (int i = 0; i < string_sigils.length; i++) {
+        this.sigils.add(string_sigils[i]);
+      }
+    } catch (RuntimeException e) {
+      this.use_default_sigils();
+    }
+
+    return true;
+  }
+
+  /**
+   * Print the current configuration state of the application to stdout.
+   */
+  void print_state() {
+    println("Window (Width,Height) = (" + this.window_width + "," + this.window_height + ")");
+    println("Cell (Width,Height) = (" + this.cell_width + "," + this.cell_height + ")");
+    println("Number of Sigils = " + this.sigils.size());
+    println("Background Color = #" + this.bg_color);
+    println("Initial Tribes = " + this.initial_tribe_count);
+    println("Tribes Mutate? = " + this.tribes_mutate);
+    println("Tribes Mutation Chance = " + this.tribes_mutate_chance);
+    println("Wait = " + this.wait);
+  }
+}
+
+void settings() {
+  global_config = new Config();
+
+  global_config.load_from_file(DEFAULT_CONFIG_FILE_PATH);
+  global_config.print_state();
+
+  size(global_config.window_width, global_config.window_height);
+}
+
 void setup()
 {
-  size(600, 600);
-
   //generate tribes
-  tribes = new Tribe[num_of_tribes+1];
-  
+  tribes = new Tribe[global_config.initial_tribe_count + 1];
+
   //blank is blank
-  tribes[0] =  new Tribe(background);
+  tribes[0] =  new Tribe(unhex(global_config.bg_color));
   for (int i = 1; i < tribes.length; i++) {
-    tribes[i] = new Tribe(sigils[(i-1)%(sigils.length-1)]);
+    tribes[i] = new Tribe(unhex(global_config.sigils.get((i - 1) % (global_config.sigils.size() - 1))));
   }
 
   //blank gets beaten by all
@@ -51,10 +143,12 @@ void setup()
     white_crushers[i-1] = tribes[i];
   }
   tribes[0].addDominators(white_crushers);
+
   //adding each tribes predators
-  int num_domniators = num_of_tribes/2;
+  int num_domniators = global_config.initial_tribe_count / 2;
   for (int i = 1; i < tribes.length; i++) {
     Tribe temp[] = new Tribe[num_domniators];
+
     //iterate over each new denominator
     for (int j = 0; j < num_domniators; j++) {
       int denom_index = i+1+j;
@@ -67,7 +161,7 @@ void setup()
   }
 
   //create blank points
-  pointy_ones = new Pointy[width/wid][height/hei];
+  pointy_ones = new Pointy[width / global_config.cell_width][height / global_config.cell_height];
   for (int i = 0; i < pointy_ones.length; i++) {
     for (int j = 0; j < pointy_ones[i].length; j++) {
       pointy_ones[i][j] = new Pointy(i, j, tribes[0]);
@@ -88,13 +182,13 @@ void draw()
   noStroke();
   for(Pointy[] point_line : pointy_ones){
     for(Pointy lil_point : point_line){
-      lil_point.display();
+      lil_point.display(global_config.cell_width, global_config.cell_height);
     }
   }
   //Allow user to draw
   if(mouse_held){mouseHeld();};
 
-  if(millis() - time >= wait){
+  if(millis() - time >= global_config.wait){
     updateCells();
     // saveFrame("line-######.png");
     time = millis();
@@ -104,15 +198,15 @@ void draw()
 void updateCells(){
   for (int i = 0; i < pointy_ones.length-1; i++) {
     for (int j = 0; j < pointy_ones[i].length-1; j++) {
-      pointy_ones[i][j].update(pointy_ones[i+1][j]);
-      pointy_ones[i][j].update(pointy_ones[i][j+1]);
+      pointy_ones[i][j].update(pointy_ones[i+1][j], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+      pointy_ones[i][j].update(pointy_ones[i][j+1], global_config.tribes_mutate, global_config.tribes_mutate_chance);
 
     }
   }
   for (int i = pointy_ones.length-1; i > 0 ; i--) {
     for (int j =  pointy_ones[i].length-1; j > 0; j--) {
-      pointy_ones[i][j].update(pointy_ones[i-1][j]);
-      pointy_ones[i][j].update(pointy_ones[i][j-1]);
+      pointy_ones[i][j].update(pointy_ones[i-1][j], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+      pointy_ones[i][j].update(pointy_ones[i][j-1], global_config.tribes_mutate, global_config.tribes_mutate_chance);
     }
   }
 }
@@ -127,12 +221,12 @@ void mouseReleased(){
 
 void mouseHeld() {
   if(mouseX>0 && mouseY>0 && mouseX<width-1 && mouseY<height-1){
-    Pointy this_point = pointy_ones[mouseX/wid][mouseY/hei];
+    Pointy this_point = pointy_ones[mouseX / global_config.cell_width][mouseY / global_config.cell_height];
     this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
   }
 }
- 
-class Pointy 
+
+class Pointy
 {
   float xP, yP;
   boolean beat = false;
@@ -142,10 +236,9 @@ class Pointy
     yP = yp;
     tribe = tr;
   }
- 
-  void update(Pointy fightee) {
-    //mutate
-    if(muatate && random(1) < mutation_chance){
+
+  void update(Pointy fightee, boolean mutate, float mutation_chance) {
+    if(mutate && random(1) < mutation_chance){
       tribe = tribes[int(random(tribes.length-1))+1];
       return;
     }
@@ -177,15 +270,15 @@ class Pointy
     tribe = tr;
     beat = true;
   }
- 
-  void display() {
+
+  void display(int cell_width, int cell_height) {
     fill(tribe.getCol());
-    rect(wid*xP, hei*yP, hei, wid);
+    rect(cell_width * xP, cell_height * yP, cell_width, cell_height);
     beat =false;
   }
 }
- 
-class Tribe 
+
+class Tribe
 {
   color sigil;
   Tribe[] dominators;
