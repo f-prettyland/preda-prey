@@ -43,7 +43,8 @@ class Config {
   ArrayList<String> sigils = new ArrayList<String>();
   String bg_color = "fff5f5f5";
 
-  int initial_tribe_count = 20;
+  int tribe_count = 20;
+  int initial_tribe_cells = 5000;
 
   boolean tribes_mutate        = true;
   float   tribes_mutate_chance = 0.000001;
@@ -83,7 +84,8 @@ class Config {
 
     this.bg_color = json.getString("bgColor", this.bg_color);
 
-    this.initial_tribe_count = json.getInt("initialTribeCount", this.initial_tribe_count);
+    this.tribe_count = json.getInt("tribeCount", this.tribe_count);
+    this.initial_tribe_cells = json.getInt("initialTribeCells", this.initial_tribe_cells);
 
     this.tribes_mutate = json.getBoolean("tribesMutate", this.tribes_mutate);
     this.tribes_mutate_chance = json.getFloat("tribesMutateChance", this.tribes_mutate_chance);
@@ -110,7 +112,8 @@ class Config {
     println("Cell (Width,Height) = (" + this.cell_width + "," + this.cell_height + ")");
     println("Number of Sigils = " + this.sigils.size());
     println("Background Color = #" + this.bg_color);
-    println("Initial Tribes = " + this.initial_tribe_count);
+    println("Tribes = " + this.tribe_count);
+    println("Initial Tribe Cells = " + this.initial_tribe_cells);
     println("Tribes Mutate? = " + this.tribes_mutate);
     println("Tribes Mutation Chance = " + this.tribes_mutate_chance);
     println("Wait = " + this.wait);
@@ -129,7 +132,7 @@ void settings() {
 void setup()
 {
   //generate tribes
-  tribes = new Tribe[global_config.initial_tribe_count + 1];
+  tribes = new Tribe[global_config.tribe_count + 1];
 
   //blank is blank
   tribes[0] =  new Tribe(unhex(global_config.bg_color));
@@ -145,7 +148,7 @@ void setup()
   tribes[0].addDominators(white_crushers);
 
   //adding each tribes predators
-  int num_domniators = global_config.initial_tribe_count / 2;
+  int num_domniators = global_config.tribe_count / 2;
   for (int i = 1; i < tribes.length; i++) {
     Tribe temp[] = new Tribe[num_domniators];
 
@@ -167,7 +170,7 @@ void setup()
       pointy_ones[i][j] = new Pointy(i, j, tribes[0]);
     }
   }
-  for (int i = 0; i < 500; i++) {
+  for (int i = 0; i < global_config.initial_tribe_cells; i++) {
     int rand_x = int(random(pointy_ones.length));
     int rand_y = int(random(pointy_ones[0].length));
     int rand_tri = int(random(tribes.length-1))+1;
