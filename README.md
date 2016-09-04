@@ -14,6 +14,16 @@ Written in Processing, this program aims to create a predator-prey model where t
 
 Warning: 30 MB gif. <sub>Sorry about that.</sub>
 
+## Running
+If you have processing installed as a system package you can simply do:
+```
+make run
+```
+If you have installed processing to a custom location you can instead do:
+```
+make run processing-bin=/path/to/processing-java
+```
+
 ## Configuration
 The sketch looks for a `config.json` file in the directory that it is run from
 and will load values if they are present.
