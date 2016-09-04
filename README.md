@@ -1,5 +1,7 @@
 # preda-prey
-Written in Processing, this program aims to create a predator-prey model where the top predator gets eaten by the bottom prey. During the model a user can click and hold to draw new in new defection/mutation with their mouse.
+Written in Processing, this program aims to create a predator-prey model where
+the top predator gets eaten by the bottom prey. During the model a user can
+click and hold to draw new in new defection/mutation with their mouse.
 
 ## 3 Groups Fighting Example
 ![](/out/example.gif)
@@ -54,9 +56,15 @@ Enable/Disable tribes mutating.
 **tribesMutateChance** (__Float__):
 Chance ranging from 0.0 to 1.0 that a tribe will mutate.
 
+**saveFrames** (__Boolean__):
+Enable/Disable saving frames of every generated step to `out/frames`.
+
+**clickMutate** (__Boolean__):
+Enable/Disable the ability for user to hold down mouse to randomise selected
+cells tribe.
+
 ## Todo
 - Expand in 8 directions not just 4
 - Increase values a lot
-- Speed of infection
-- Add flag for disabling clicking interaction
+- Speed of infection, momentum for travelling waves of success
 - Use this pattern as vector of movement for datamosh

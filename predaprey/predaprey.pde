@@ -50,6 +50,8 @@ class Config {
   float   tribes_mutate_chance = 0.000001;
 
   int wait = 1;
+  boolean save_frames = false;
+  boolean click_mutate = false;
 
   /**
    * Add the default sigil colors.
@@ -91,6 +93,9 @@ class Config {
     this.tribes_mutate_chance = json.getFloat("tribesMutateChance", this.tribes_mutate_chance);
 
     this.wait = json.getInt("wait", this.wait);
+    this.save_frames = json.getBoolean("saveFrames", this.save_frames);
+
+    this.click_mutate = json.getBoolean("clickMutate", this.click_mutate);
 
     try {
       String[] string_sigils = json.getJSONArray("sigils").getStringArray();
@@ -114,9 +119,11 @@ class Config {
     println("Background Color = #" + this.bg_color);
     println("Tribes = " + this.tribe_count);
     println("Initial Tribe Cells = " + this.initial_tribe_cells);
-    println("Tribes Mutate? = " + this.tribes_mutate);
+    println("Tribes Mutate-P = " + this.tribes_mutate);
     println("Tribes Mutation Chance = " + this.tribes_mutate_chance);
     println("Wait = " + this.wait);
+    println("Save Frames-P = " + this.save_frames);
+    println("Click Mutation-P = " + this.click_mutate);
   }
 }
 
@@ -189,11 +196,13 @@ void draw()
     }
   }
   //Allow user to draw
-  if(mouse_held){mouseHeld();};
+  if(global_config.click_mutate && mouse_held){mouseHeld();};
 
   if(millis() - time >= global_config.wait){
     updateCells();
-    // saveFrame("line-######.png");
+    if(global_config.save_frames){
+      saveFrame("../out/frames/frame-######.png");
+    }
     time = millis();
   }
 }

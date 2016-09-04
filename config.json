@@ -1,4 +1,5 @@
 {
+	"wait": 500,
 	"cellWidth": 5,
 	"cellHeight": 5,
 	"windowWidth": 300,
@@ -6,5 +7,7 @@
 	"tribeCount": 10,
 	"initialTribeCells": 5000,
 	"tribesMutate": true,
-	"tribesMutateChance": 0.00001
+	"tribesMutateChance": 0.00001,
+	"saveFrames": false,
+	"clickMutate": false
 }
