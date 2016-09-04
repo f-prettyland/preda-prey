@@ -1,15 +1,18 @@
 # preda-prey
-Written in Processing, this program aims to create a predator-prey model where the top predator gets eaten by the bottom prey.
+Written in Processing, this program aims to create a predator-prey model where the top predator gets eaten by the bottom prey. During the model a user can click and hold to draw new in new defection/mutation with their mouse.
 
 ## 3 Groups Fighting Example
 ![](/out/example.gif)
 
-## 20 Groups Fighting Examples with 0.000001% Defection Rate
+## 20 Groups Fighting Examples with 0.000001% Defection Rate - No Interaction
 ### 500 initial tribe cells
 ![](/out/example-20-1.gif)
 
 ### 5000 initial tribe cells
-![](/out/example-20-2.gif)
+[See animation](/out/example-20-2.gif)
+
+
+Warning: 30 MB gif. <sub>Sorry about that.</sub>
 
 ## Configuration
 The sketch looks for a `config.json` file in the directory that it is run from
@@ -20,7 +23,7 @@ Colors are specified as string representation of hex codes with the first
 digit being the alpha channel and the following digits the standard RGB
 values.
 
-**cellHeight** and **cellWidth** (__Integers__): 
+**cellHeight** and **cellWidth** (__Integers__):
 Height/Width of each cell that can be occupied.
 
 **windowHeight** and **windowWidth** (__Integers__):
@@ -42,7 +45,8 @@ Enable/Disable tribes mutating.
 Chance ranging from 0.0 to 1.0 that a tribe will mutate.
 
 ## Todo
+- Expand in 8 directions not just 4
 - Increase values a lot
 - Speed of infection
-- Add interactive
-	+ input values
+- Add flag for disabling clicking interaction
+- Use this pattern as vector of movement for datamosh
