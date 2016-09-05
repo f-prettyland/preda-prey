@@ -87,10 +87,12 @@ class Config {
 		this.bg_color = json.getString("bgColor", this.bg_color);
 
 		this.tribe_count = json.getInt("tribeCount", this.tribe_count);
-		this.initial_tribe_cells = json.getInt("initialTribeCells", this.initial_tribe_cells);
+		this.initial_tribe_cells =
+			json.getInt("initialTribeCells", this.initial_tribe_cells);
 
 		this.tribes_mutate = json.getBoolean("tribesMutate", this.tribes_mutate);
-		this.tribes_mutate_chance = json.getFloat("tribesMutateChance", this.tribes_mutate_chance);
+		this.tribes_mutate_chance =
+			json.getFloat("tribesMutateChance", this.tribes_mutate_chance);
 
 		this.wait = json.getInt("wait", this.wait);
 		this.save_frames = json.getBoolean("saveFrames", this.save_frames);
@@ -113,8 +115,10 @@ class Config {
 	 * Print the current configuration state of the application to stdout.
 	 */
 	void print_state() {
-		println("Window (Width,Height) = (" + this.window_width + "," + this.window_height + ")");
-		println("Cell (Width,Height) = (" + this.cell_width + "," + this.cell_height + ")");
+		println("Window (Width,Height) = (" + this.window_width +
+			"," + this.window_height + ")");
+		println("Cell (Width,Height) = (" + this.cell_width + "," +
+		 	this.cell_height + ")");
 		println("Number of Sigils = " + this.sigils.size());
 		println("Background Color = #" + this.bg_color);
 		println("Tribes = " + this.tribe_count);
@@ -144,7 +148,8 @@ void setup()
 	//blank is blank
 	tribes[0] =  new Tribe(unhex(global_config.bg_color));
 	for (int i = 1; i < tribes.length; i++) {
-		tribes[i] = new Tribe(unhex(global_config.sigils.get((i - 1) % (global_config.sigils.size() - 1))));
+		tribes[i] = new Tribe(unhex(global_config.sigils.get((i - 1)
+														% (global_config.sigils.size() - 1))));
 	}
 
 	//blank gets beaten by all
@@ -171,7 +176,9 @@ void setup()
 	}
 
 	//create blank points
-	pointy_ones = new Pointy[width / global_config.cell_width][height / global_config.cell_height];
+	pointy_ones = new Pointy
+			[width / global_config.cell_width]
+			[height / global_config.cell_height];
 	for (int i = 0; i < pointy_ones.length; i++) {
 		for (int j = 0; j < pointy_ones[i].length; j++) {
 			pointy_ones[i][j] = new Pointy(i, j, tribes[0]);
@@ -210,15 +217,27 @@ void draw()
 void updateCells(){
 	for (int i = 0; i < pointy_ones.length-1; i++) {
 		for (int j = 0; j < pointy_ones[i].length-1; j++) {
-			pointy_ones[i][j].update(pointy_ones[i+1][j], global_config.tribes_mutate, global_config.tribes_mutate_chance);
-			pointy_ones[i][j].update(pointy_ones[i][j+1], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+			pointy_ones[i][j].update(
+						pointy_ones[i+1][j],
+				 		global_config.tribes_mutate,
+						global_config.tribes_mutate_chance);
+			pointy_ones[i][j].update(
+						pointy_ones[i][j+1],
+						global_config.tribes_mutate,
+						global_config.tribes_mutate_chance);
 
 		}
 	}
 	for (int i = pointy_ones.length-1; i > 0 ; i--) {
 		for (int j =  pointy_ones[i].length-1; j > 0; j--) {
-			pointy_ones[i][j].update(pointy_ones[i-1][j], global_config.tribes_mutate, global_config.tribes_mutate_chance);
-			pointy_ones[i][j].update(pointy_ones[i][j-1], global_config.tribes_mutate, global_config.tribes_mutate_chance);
+			pointy_ones[i][j].update(
+					pointy_ones[i-1][j],
+					global_config.tribes_mutate,
+					global_config.tribes_mutate_chance);
+			pointy_ones[i][j].update(
+					pointy_ones[i][j-1],
+					global_config.tribes_mutate,
+					global_config.tribes_mutate_chance);
 		}
 	}
 }
@@ -233,7 +252,9 @@ void mouseReleased(){
 
 void mouseHeld() {
 	if(mouseX>0 && mouseY>0 && mouseX<width-1 && mouseY<height-1){
-		Pointy this_point = pointy_ones[mouseX / global_config.cell_width][mouseY / global_config.cell_height];
+		Pointy this_point = pointy_ones
+				[mouseX / global_config.cell_width]
+				[mouseY / global_config.cell_height];
 		this_point.setTribe(tribes[int(random(tribes.length-1))+1]);
 	}
 }

@@ -63,8 +63,17 @@ Enable/Disable saving frames of every generated step to `out/frames`.
 Enable/Disable the ability for user to hold down mouse to randomise selected
 cells tribe.
 
+## Details
+### Colours
+There are hard coded colours taken lovingly from Kelly's 22 colours of maximum
+contrast with the encoding taken from this [post](https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors/4382138#4382138).
+With 22 maximum colours it means with more than 22 tribes that the colours are
+reused currently.
+
 ## Todo
 - Expand in 8 directions not just 4
 - Increase values a lot
+- Random colour generation
+- Create user interactable sliders
 - Speed of infection, momentum for travelling waves of success
 - Use this pattern as vector of movement for datamosh

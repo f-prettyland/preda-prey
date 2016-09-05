@@ -1,5 +1,5 @@
 {
-	"wait": 500,
+	"wait": 50,
 	"cellWidth": 5,
 	"cellHeight": 5,
 	"windowWidth": 300,
